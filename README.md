@@ -45,11 +45,13 @@ npm run set-url https://your-project.vercel.app
 npx vercel --prod
 ```
 
-### Option B: GitHub Pages (Static + Hourly GitHub Actions Refresh)
+### Option B: GitHub Pages (Live Deployment — Static + Automated 30-Minute GitHub Actions Refresh)
 
 1. Push this repository to GitHub.
-2. Enable **Settings -> Pages -> Source: GitHub Actions** and add repository variable `ENABLE_GITHUB_PAGES=true`.
-3. The included workflow `.github/workflows/refresh-snapshot.yml` refreshes `public/data/market-snapshot.json` hourly via `npm run snapshot` and publishes `public/`.
+2. Enable **Settings -> Pages -> Source: GitHub Actions**.
+3. The included workflow `.github/workflows/refresh-snapshot.yml` runs `npm run snapshot` server-side every 30 minutes (`cron: '5,35 * * * *'`), writes `public/data/market-snapshot.json`, and publishes `public/` over HTTPS (`Cache-Control: max-age=600`).
+
+Live instance: `https://da4n1k.github.io/taskmarket-live-visualizer/`
 
 ## Verification & Parity Tests
 
