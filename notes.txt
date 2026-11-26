@@ -1,0 +1,43 @@
+Taskmarket Live Market Visualizer — Submission Notes (TSK-BRK611AN)
+
+Live URL: https://da4n1k.github.io/taskmarket-live-visualizer/
+Repository URL: https://github.com/Da4n1k/taskmarket-live-visualizer
+License: MIT
+
+Stack
+- Runtime: Node.js 20+ (native ESM, zero external runtime dependencies)
+- Backend / Hosting: Hosted live on GitHub Pages via scheduled GitHub Actions server-side build (.github/workflows/refresh-snapshot.yml running scripts/build-snapshot.mjs every 30 minutes); also includes drop-in Vercel Serverless Function (api/market.mjs) and matching local Node server (server.mjs) for one-command self-hosting
+- Frontend: Vanilla HTML5, CSS3, ES Modules, custom interactive SVG visualizations, client-side Canvas PNG share card generator
+- Brand Assets: Self-hosted Instrument Serif, Inter Tight, and Departure Mono (SIL OFL 1.1 licences bundled in public/assets/fonts/), untouched taskmarket-lockup.png and taskmarket-mark.png, strict 9-colour Taskmarket Brand Kit palette
+- Visual Plates: Bespoke text-free, UI-free atmospheric backdrop plates generated with Nano Banana 3.1 (Gemini Image) harmonizing with the Brand Kit plates, with all typography and lockup composited programmatically
+
+Endpoints Used (All Fetched Server-Side from https://api.taskmarket.dev)
+1. GET /api/market/stats (combined, chainId=4217, chainId=8453)
+2. GET /api/stats/breakdowns (chainId=4217, chainId=8453)
+3. GET /api/stats/platform-time-series (chainId=4217, chainId=8453; range=7d|30d|90d|all; bucket=day|week)
+4. GET /api/stats/activity-heatmap (chainId=4217, chainId=8453; range=7d|30d|90d|all; dimension=mode|hourOfWeek)
+5. GET /api/stats/activity-feed (chainId=4217, chainId=8453; limit=50; paginated with cursor)
+6. GET /api/tasks (chainId=4217, chainId=8453; sort=newest; limit=100; fully paginated with cursor)
+
+Refresh & Caching Mechanism
+- Production (GitHub Pages): GitHub Actions workflow (.github/workflows/refresh-snapshot.yml) runs scripts/build-snapshot.mjs server-side on cron '5,35 * * * *' (every 30 minutes — well inside the hourly requirement even accounting for Actions schedule jitter), builds public/data/market-snapshot.json, and deploys to GitHub Pages HTTPS (CDN Cache-Control: max-age=600, satisfying >= 60s caching). The browser never calls api.taskmarket.dev directly.
+- Self-hosted / Vercel mode: Server-side endpoint GET /api/market fetches all 6 endpoints across Tempo (4217) and Base (8453) with bounded concurrency and in-flight coalescing, 300s in-memory TTL, and Cache-Control: public, max-age=60, s-maxage=300, stale-while-revalidate=600.
+- Visible UTC "Data as of" timestamp in header, footer, share cards, and Methods & Endpoints drawer.
+
+Original Views & Computed Insights
+- Escrow Flow River: Interactive SVG flow tracing escrowed USD from requester tiers (Top 5, #6-20, Long Tail) through Tempo (OUSD) and Base (USDC) into settled payouts, active escrow, pending approval, or expired/cancelled tasks.
+- Swarm Convergence Map: Interactive log-USD vs submissions scatter plot revealing high-reward low-crowd open tasks versus dense agent swarms.
+- Distinct Task Posters per Week: Computed strictly from all paginated /api/tasks pages, deduplicating requester wallet addresses per Monday-start ISO UTC week across Tempo, Base, and Combined.
+- Diagnostics: Poster concentration (top-5/top-10 share & HHI), median claim latency and recent submission latency, task mortality and unsettled escrow, and 7-day Tempo vs Base momentum.
+- Shareability: Deep-link URL parameters (?chain=&range=&bucket=&dim=&view=), 1200x630 Open Graph / X share image (public/og-image.png), one-click copy link, and client-side per-view PNG share card download.
+
+One-Command Deploy
+- Vercel (recommended): npx vercel --prod
+- Local server: npm start
+- Parity & compliance test suite: npm test
+
+Compliance
+- Read-only; no wallet connection; no login; no personal data tracking or analytics.
+- Wallet addresses shown strictly as truncated hex prefixes with no guessed names.
+- Footer states: "Made for a paid Taskmarket bounty. Not an official Taskmarket product."
+- No third-party logos, no invented numbers, zero banned words.

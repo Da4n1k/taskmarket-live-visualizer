@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Taskmarket Live Market Visualizer — Tempo &amp; Base</title>
+    <meta
+      name="description"
+      content="Live on-chain market visualizer for Taskmarket across Tempo (OUSD) and Base (USDC): escrow flows, swarm convergence, daily agents, weekly distinct posters, heatmaps, and live feed."
+    />
+    <meta name="theme-color" content="#12100E" />
+
+    <!-- Open Graph / Social Share -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Taskmarket Live Market Visualizer" />
+    <meta
+      property="og:description"
+      content="Live escrow flows, agent swarm convergence, weekly distinct posters, and market activity across Tempo (OUSD) and Base (USDC)."
+    />
+    <meta property="og:url" content="https://da4n1k.github.io/taskmarket-live-visualizer/" />
+    <meta property="og:image" content="https://da4n1k.github.io/taskmarket-live-visualizer/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Taskmarket Live Market Visualizer — Tempo and Base escrow flows and market activity" />
+
+    <!-- X / Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Taskmarket Live Market Visualizer" />
+    <meta
+      name="twitter:description"
+      content="Live escrow flows, agent swarm convergence, weekly distinct posters, and market activity across Tempo (OUSD) and Base (USDC)."
+    />
+    <meta name="twitter:image" content="https://da4n1k.github.io/taskmarket-live-visualizer/og-image.png" />
+
+    <link rel="icon" type="image/png" href="./assets/taskmarket-mark.png" />
+    <link rel="preload" href="./assets/fonts/DepartureMono-Regular.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="./assets/fonts/InstrumentSerif-Regular.ttf" as="font" type="font/ttf" crossorigin />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="bg-glow" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <div class="wrap header-inner">
+        <a class="lockup-frame" href="./" aria-label="Taskmarket Live Market Visualizer Home">
+          <img
+            src="./assets/taskmarket-lockup.png"
+            alt="Taskmarket"
+            width="971"
+            height="176"
+            class="brand-lockup"
+          />
+        </a>
+        <div class="header-meta">
+          <span class="status-pill" id="data-as-of-pill" title="Server-fetched UTC timestamp">
+            <span class="live-dot" aria-hidden="true"></span>
+            <span id="data-as-of-text">Loading live data...</span>
+          </span>
+          <a class="mono-link" href="https://taskmarket.dev" target="_blank" rel="noopener noreferrer">taskmarket.dev</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="wrap main-content">
+      <!-- Hero & Controls -->
+      <section class="hero" id="view-overview" aria-labelledby="hero-heading">
+        <div class="hero-top">
+          <div class="hero-copy">
+            <p class="kicker">TEMPO (4217 · OUSD) &amp; BASE (8453 · USDC) · SERVER-CACHED LIVE LEDGER</p>
+            <h1 id="hero-heading" class="hero-title">The live market, <em>measured.</em></h1>
+            <p class="hero-subtitle">
+              Real-time view of tasks posted, escrow committed, agent competition, and payouts settled on Taskmarket. Read-only. Every figure comes directly from api.taskmarket.dev.
+            </p>
+          </div>
+          <div class="hero-actions">
+            <button type="button" class="btn btn-salmon" id="btn-copy-link">Copy View Link</button>
+            <button type="button" class="btn btn-ghost" id="btn-share-card-hero">Download Share Card</button>
+            <button type="button" class="btn btn-ghost" id="btn-toggle-methods" aria-expanded="false" aria-controls="methods-section">
+              Methods &amp; Endpoints
+            </button>
+          </div>
+        </div>
+
+        <nav class="control-bar" aria-label="Market filters and view switcher">
+          <div class="control-group" role="group" aria-label="Chain filter">
+            <span class="control-label">Chain</span>
+            <div class="segmented" id="chain-switch">
+              <button type="button" class="seg-btn active" data-chain="all">All Chains</button>
+              <button type="button" class="seg-btn" data-chain="4217">Tempo · 4217</button>
+              <button type="button" class="seg-btn" data-chain="8453">Base · 8453</button>
+            </div>
+          </div>
+
+          <div class="control-group" role="group" aria-label="Time range">
+            <span class="control-label">Range</span>
+            <div class="segmented" id="range-switch">
+              <button type="button" class="seg-btn" data-range="7d">7d</button>
+              <button type="button" class="seg-btn active" data-range="30d">30d</button>
+              <button type="button" class="seg-btn" data-range="90d">90d</button>
+              <button type="button" class="seg-btn" data-range="all">All</button>
+            </div>
+          </div>
+
+          <div class="control-group" role="group" aria-label="Time bucket">
+            <span class="control-label">Bucket</span>
+            <div class="segmented" id="bucket-switch">
+              <button type="button" class="seg-btn active" data-bucket="day">Day</button>
+              <button type="button" class="seg-btn" data-bucket="week">Week</button>
+            </div>
+          </div>
+
+          <div class="control-group view-jump" role="group" aria-label="Jump to view">
+            <span class="control-label">Views</span>
+            <div class="segmented" id="view-switch">
+              <button type="button" class="seg-btn active" data-view="overview">Overview</button>
+              <button type="button" class="seg-btn" data-view="flow">Escrow Flow</button>
+              <button type="button" class="seg-btn" data-view="swarm">Swarm Map</button>
+              <button type="button" class="seg-btn" data-view="series">Series</button>
+              <button type="button" class="seg-btn" data-view="insights">Insights</button>
+              <button type="button" class="seg-btn" data-view="activity">Activity</button>
+            </div>
+          </div>
+        </nav>
+
+        <div id="error-banner" class="error-banner" hidden role="alert"></div>
+
+        <!-- Headline KPI Grid -->
+        <div class="kpi-grid" id="headline-kpis" aria-live="polite">
+          <article class="kpi-card skeleton"><div class="kpi-label">Registered Workers</div><div class="kpi-value">—</div><div class="kpi-sub">Loading...</div></article>
+          <article class="kpi-card skeleton"><div class="kpi-label">Active Workers (7d)</div><div class="kpi-value">—</div><div class="kpi-sub">Loading...</div></article>
+          <article class="kpi-card skeleton"><div class="kpi-label">Open Tasks</div><div class="kpi-value">—</div><div class="kpi-sub">Loading...</div></article>
+          <article class="kpi-card skeleton"><div class="kpi-label">Paid Workers</div><div class="kpi-value">—</div><div class="kpi-sub">Loading...</div></article>
+          <article class="kpi-card skeleton"><div class="kpi-label">Active Wallets</div><div class="kpi-value">—</div><div class="kpi-sub">Loading...</div></article>
+          <article class="kpi-card skeleton"><div class="kpi-label">Public Escrow Ledger</div><div class="kpi-value">—</div><div class="kpi-sub">Loading...</div></article>
+        </div>
+
+        <!-- Dual-Chain Ledger Bar -->
+        <div class="chain-strip" id="chain-comparison-strip" aria-label="Tempo vs Base comparison"></div>
+      </section>
+
+      <!-- Original Visual 1: Escrow Flow River -->
+      <section class="panel-section" id="view-flow" aria-labelledby="flow-heading">
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="kicker">ORIGINAL VIEW 01 · CAPITAL TOPOLOGY</p>
+              <h2 id="flow-heading" class="panel-title">Escrow Flow River</h2>
+              <p class="panel-desc" id="flow-subtitle">
+                How escrowed USD flows from requester tiers through Tempo (OUSD) and Base (USDC) into settled payouts, active pools, or expired and cancelled tasks.
+              </p>
+            </div>
+            <div class="panel-actions">
+              <span class="scope-tag" id="flow-scope-tag">All public tasks</span>
+              <button type="button" class="btn-mini" data-copy-view="flow">Copy link</button>
+              <button type="button" class="btn-mini" data-share-view="flow">Share PNG</button>
+            </div>
+          </div>
+          <div class="viz-wrap" id="escrow-flow-viz" aria-label="Escrow Flow River diagram"></div>
+          <div class="flow-legend">
+            <span><i class="swatch swatch-settled"></i>Settled payouts</span>
+            <span><i class="swatch swatch-active"></i>Open &amp; claimed</span>
+            <span><i class="swatch swatch-pending"></i>Pending approval</span>
+            <span><i class="swatch swatch-dead"></i>Expired &amp; cancelled</span>
+            <span class="legend-hint">Hover ribbons for exact USD and task counts. Click Tempo or Base node to filter.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Original Visual 2: Swarm Convergence Map -->
+      <section class="panel-section" id="view-swarm" aria-labelledby="swarm-heading">
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="kicker">ORIGINAL VIEW 02 · COMPETITION GEOMETRY</p>
+              <h2 id="swarm-heading" class="panel-title">Swarm Convergence Map</h2>
+              <p class="panel-desc">
+                Every public task plotted by reward (log USD) against agent submissions. Bottom-right shows high-reward, low-crowd tasks; top shows dense agent swarming.
+              </p>
+            </div>
+            <div class="panel-actions">
+              <div class="segmented segmented-sm" id="swarm-status-filter" role="group" aria-label="Filter scatter by status">
+                <button type="button" class="seg-btn active" data-swarm-status="all">All</button>
+                <button type="button" class="seg-btn" data-swarm-status="open">Open</button>
+                <button type="button" class="seg-btn" data-swarm-status="completed">Settled</button>
+                <button type="button" class="seg-btn" data-swarm-status="dead">Dead</button>
+              </div>
+              <button type="button" class="btn-mini" data-copy-view="swarm">Copy link</button>
+              <button type="button" class="btn-mini" data-share-view="swarm">Share PNG</button>
+            </div>
+          </div>
+          <div class="viz-wrap" id="swarm-map-viz" aria-label="Swarm Convergence scatter plot"></div>
+          <div class="swarm-inspector" id="swarm-inspector" hidden></div>
+          <div class="spotlight-wrap">
+            <div class="spotlight-head">
+              <span class="kicker">OPEN LOW-CROWD SPOTLIGHT · HIGHEST REWARD PER SUBMISSION</span>
+              <span class="mono-muted" id="spotlight-count"></span>
+            </div>
+            <div class="spotlight-grid" id="spotlight-grid"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Time Series & Weekly Distinct Posters -->
+      <section class="panel-section" id="view-series" aria-labelledby="series-heading">
+        <div class="grid-two-asym">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="kicker">MARKET VELOCITY</p>
+                <h2 id="series-heading" class="panel-title">Agents, Tasks &amp; Escrow Over Time</h2>
+                <p class="panel-desc" id="series-subtitle">
+                  Active agents, tasks posted, rewards escrowed, and rewards paid across the selected window.
+                </p>
+              </div>
+              <div class="panel-actions">
+                <span class="scope-tag" id="series-scope-tag">Platform API</span>
+                <button type="button" class="btn-mini" data-copy-view="series">Copy link</button>
+                <button type="button" class="btn-mini" data-share-view="series">Share PNG</button>
+              </div>
+            </div>
+            <div class="subchart-block">
+              <div class="subchart-label">
+                <span>Active Agents (line) &amp; Tasks Posted (bars)</span>
+                <span class="mono-muted" id="series-agents-summary"></span>
+              </div>
+              <div class="viz-wrap" id="series-agents-viz"></div>
+            </div>
+            <div class="subchart-block">
+              <div class="subchart-label">
+                <span>Rewards Put Up vs Rewards Paid (USD)</span>
+                <span class="mono-muted" id="series-volume-summary"></span>
+              </div>
+              <div class="viz-wrap" id="series-volume-viz"></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="kicker">COMPUTED FROM PAGINATED /API/TASKS</p>
+                <h2 class="panel-title">Distinct Task Posters per Week</h2>
+                <p class="panel-desc">
+                  Unique requester wallets per ISO UTC week (Monday start) on Tempo (4217), Base (8453), and combined deduplicated total.
+                </p>
+              </div>
+              <div class="panel-actions">
+                <button type="button" class="btn-mini" data-share-view="posters">Share PNG</button>
+              </div>
+            </div>
+            <div class="viz-wrap" id="weekly-posters-viz"></div>
+            <div class="posters-summary" id="weekly-posters-summary"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Insights Panel (20% Rubric) -->
+      <section class="panel-section" id="view-insights" aria-labelledby="insights-heading">
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="kicker">COMPUTED MARKET DIAGNOSTICS</p>
+              <h2 id="insights-heading" class="panel-title">What Is Not Obvious</h2>
+              <p class="panel-desc">
+                Requester concentration, decision speed, task mortality, and cross-chain momentum derived directly from the live task ledger and activity stream.
+              </p>
+            </div>
+            <div class="panel-actions">
+              <span class="scope-tag" id="insights-scope-tag">All public tasks</span>
+              <button type="button" class="btn-mini" data-copy-view="insights">Copy link</button>
+              <button type="button" class="btn-mini" data-share-view="insights">Share PNG</button>
+            </div>
+          </div>
+          <div class="insights-grid" id="insights-grid"></div>
+        </div>
+      </section>
+
+      <!-- Breakdowns: Status, Mode, Actor Type -->
+      <section class="panel-section" id="view-breakdowns" aria-labelledby="breakdowns-heading">
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="kicker">MARKET STRUCTURE</p>
+              <h2 id="breakdowns-heading" class="panel-title">Tasks by Mode, Status &amp; Actor Type</h2>
+              <p class="panel-desc" id="breakdowns-subtitle">
+                Exact counts from /api/stats/breakdowns (combined) and per-chain public task breakdowns from /api/tasks.
+              </p>
+            </div>
+            <div class="panel-actions">
+              <span class="scope-tag" id="breakdowns-scope-tag">Platform API</span>
+            </div>
+          </div>
+          <div class="breakdowns-grid" id="breakdowns-grid"></div>
+        </div>
+      </section>
+
+      <!-- Activity Heatmap + Live Feed -->
+      <section class="panel-section" id="view-activity" aria-labelledby="activity-heading">
+        <div class="grid-two-equal">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="kicker">TEMPORAL RHYTHM</p>
+                <h2 id="activity-heading" class="panel-title">Activity Heatmap</h2>
+                <p class="panel-desc" id="heatmap-subtitle">
+                  Task creation and activity intensity by UTC hour of week or task mode over time.
+                </p>
+              </div>
+              <div class="panel-actions">
+                <div class="segmented segmented-sm" id="heatmap-dim-switch" role="group" aria-label="Heatmap dimension">
+                  <button type="button" class="seg-btn active" data-dim="hourOfWeek">Hour of Week</button>
+                  <button type="button" class="seg-btn" data-dim="mode">By Mode</button>
+                </div>
+              </div>
+            </div>
+            <div class="viz-wrap" id="heatmap-viz"></div>
+            <div class="heatmap-footer" id="heatmap-footer"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="kicker">REAL-TIME EVENT LEDGER</p>
+                <h2 class="panel-title">Live Activity Feed</h2>
+                <p class="panel-desc" id="feed-subtitle">
+                  Latest task creations, agent submissions, and claims fetched server-side from /api/stats/activity-feed.
+                </p>
+              </div>
+              <div class="panel-actions">
+                <div class="segmented segmented-sm" id="feed-type-switch" role="group" aria-label="Feed event type">
+                  <button type="button" class="seg-btn active" data-feed-type="all">All</button>
+                  <button type="button" class="seg-btn" data-feed-type="task_submitted">Submitted</button>
+                  <button type="button" class="seg-btn" data-feed-type="task_created">Created</button>
+                  <button type="button" class="seg-btn" data-feed-type="task_claimed">Claimed</button>
+                </div>
+              </div>
+            </div>
+            <div class="feed-list" id="activity-feed-list" aria-live="polite"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Methods & Endpoints Drawer -->
+      <section class="panel-section" id="methods-section" aria-labelledby="methods-heading">
+        <details class="panel methods-panel" id="methods-details">
+          <summary class="methods-summary">
+            <div>
+              <p class="kicker">TRANSPARENCY &amp; REPRODUCIBILITY</p>
+              <h2 id="methods-heading" class="panel-title">Methods, Endpoints &amp; Cache Policy</h2>
+            </div>
+            <span class="mono-muted">Expand technical specification</span>
+          </summary>
+          <div class="methods-body" id="methods-body"></div>
+        </details>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap footer-inner">
+        <div class="footer-primary">
+          <p>Made for a paid Taskmarket bounty. Not an official Taskmarket product.</p>
+          <p class="footer-sub">
+            Read-only market visualizer. No wallet connection. No login. No personal data tracking. Open source under the MIT licence.
+          </p>
+        </div>
+        <div class="footer-right">
+          <span class="mono-muted" id="footer-data-time">Data as of —</span>
+          <a class="mono-link" href="https://taskmarket.dev" target="_blank" rel="noopener noreferrer">taskmarket.dev</a>
+        </div>
+      </div>
+    </footer>
+
+    <div class="tooltip" id="chart-tooltip" role="tooltip" hidden></div>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

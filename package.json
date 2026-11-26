@@ -1,0 +1,16 @@
+{
+  "name": "taskmarket-live-visualizer",
+  "version": "1.0.0",
+  "description": "Live market visualizer for Taskmarket across Tempo (4217) and Base (8453).",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "snapshot": "node scripts/build-snapshot.mjs",
+    "set-url": "node scripts/set-site-url.mjs",
+    "test": "node tests/verify-parity.test.mjs"
+  }
+}
