@@ -2,7 +2,7 @@ name: Refresh Market Snapshot & Deploy Pages
 
 on:
   schedule:
-    - cron: '5,35 * * * *'
+    - cron: '*/20 * * * *'
   workflow_dispatch:
   push:
     branches: [main]
@@ -14,14 +14,11 @@ permissions:
 
 concurrency:
   group: pages-refresh
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -41,6 +38,16 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Wait for artifact index consistency
+        run: sleep 5
 
       - name: Deploy to GitHub Pages
         id: deployment
